@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "fastapi-auth"
+version = "0.1.0"
+description = "A simple event driven authentication system with fastapi"
+authors = ["ericcardozo <eric.m.cardozo@mi.unc.edu.ar>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.5.3"
+passlib = "^1.7.4"
+
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^7.4.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
