@@ -1,7 +1,4 @@
-from uuid import UUID
-from typing import Union
-
-ID = Union[str, UUID]
+from src.auth.domain.models import ID
 
 class Account:
     def __init__(self, id : ID, username : str):

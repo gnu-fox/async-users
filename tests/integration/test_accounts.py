@@ -3,8 +3,7 @@ import dotenv
 import pytest
 
 from src.auth.domain.models import SecretStr
-from src.auth.ports.context import Users
-from src.auth.adapters.sqlalchemy.orm import ORM as SqlAlchemyORM, URL
+from src.auth.adapters.async_sqlalchemy.crud import ORM, Accounts, URL
 
 dotenv.load_dotenv()
 
@@ -20,25 +19,18 @@ def database_url() -> URL:
     return url
 
 @pytest.fixture(scope='class')
-def users(database_url : URL) -> Users:
-    yield Users(orm=SqlAlchemyORM(url=database_url))
+async def orm(database_url : URL) -> ORM:
+    async with ORM(database_url) as orm:
+        yield orm
 
-
-def test_accounts_crud(users : Users):
-    with users:
-        users.accounts.crud.create(username='test', password=SecretStr('test'))
-        users.commit()
-    
-    with users:
-        account = users.accounts.crud.read(username='test')
+async def test_accounts(orm : ORM):
+    async with orm as session:
+        accounts = Accounts(session)
+        await accounts.create(username='test', password=SecretStr('test'))
+        account = await accounts.read(username='test')
         assert account.username == 'test'
-        assert account.verify(SecretStr('test')) == True
-        assert account.verify(SecretStr('test2')) == False
-    
-    with users:
-        users.accounts.crud.delete(id=account.id)
-        users.commit()
+        await accounts.delete(id=account.id)
+        account = await accounts.read(username='test')
+        assert account is None
 
-    with users:
-        assert users.accounts.crud.read(username='test') == None
-        users.rollback()
+    
