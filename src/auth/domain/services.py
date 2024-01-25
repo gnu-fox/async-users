@@ -13,8 +13,10 @@ class Cryptography(Protocol):
 class Service:
     pass
 
+from passlib.context import CryptContext
+
 class Security(Service):
-    context: Cryptography
+    context: Cryptography = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
     @classmethod
     def hash(cls, password : Union[str, SecretStr]) -> str:

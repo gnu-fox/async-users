@@ -1,11 +1,9 @@
 from uuid import uuid4
 from typing import Union
-from typing import Protocol
 
 from sqlalchemy import URL
 from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.auth.domain.models import SecretStr
 from src.auth.domain.aggregates import Account, ID

@@ -18,9 +18,6 @@ class Session(Protocol):
 T, ID = TypeVar('T'), TypeVar('ID')
 class CRUD(ABC, Generic[T]):
 
-    def __init__(self, session : Session):
-        self.session = session
-
     @abstractmethod
     async def create(self, *args, **kwargs):
         pass
@@ -43,3 +40,20 @@ class ORM(Protocol):
     @property
     def repositories(self) -> dict[str, CRUD]:
         ...
+
+class UOW:
+    def __init__(self, orm : ORM):
+        self.__orm = orm
+
+    async def __aenter__(self):
+        self.__session = self.__orm.session
+        await self.__session.begin()
+        return self
+        
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.__session.rollback()
+        await self.__session.close()
+
+    async def commit(self):
+        await self.__session.commit()
+    
