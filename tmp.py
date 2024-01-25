@@ -1,31 +1,38 @@
-from abc import ABC, abstractmethod, abstractproperty
-
-class Base(ABC):
-
-    @property
-    @abstractmethod
-    def age(self) -> int:
-        pass
+class User:
+    def __init__(self, id : int):
+        self.id = id
 
 
-class Derived(Base):
-    number : int
+class Context:
+    users = set()
 
     def __init__(self):
-        pass
+        self.user1 : User = User(id=None)
+        self.user2 : User = User(id=None)
 
-    @property
-    def age(self) -> int:
-        return self.number
-    
-    def __enter__(self):
-        self.number = 1
+        self.users.add(self.user1)
+        self.users.add(self.user2)
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        pass
+    def change_user(self):
+        self.user1.__init__(id=3)
+        self.user2.__init__(id=4)
 
 
-derived = Derived()
 
-with derived:
-    print(derived.age)
+users = Context()
+
+
+for user in users.users:
+    print(user)
+
+users.change_user()
+
+for user in users.users:
+    print(user)
+
+copy = users.user1
+copy.id = 5
+
+
+for user in users.users:
+    print(user.id)

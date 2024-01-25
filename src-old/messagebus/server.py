@@ -2,8 +2,8 @@ import logging
 from abc import ABC
 from typing import Dict, List, Callable, Union
 
-from src.messagebus.events import Event, Command
-from src.messagebus.context import Context
+from messagebus.domain import Event, Command
+from messagebus.ports import Context
 
 class Application(ABC):
 
@@ -26,7 +26,7 @@ class Application(ABC):
                 raise Exception(f'{message} was not an Event or Command')
             
     def handle_event(self, event : Event):
-        for handler in self.event_handlers[type(event)]:
+        for handler in self.event_handlers[event.type]:
             try:
                 handler(event)
                 self.queue.extend(self.context.events)
@@ -35,7 +35,7 @@ class Application(ABC):
 
     def handle_command(self, command : Command):
         try:
-            handler = self.command_handlers[type(command)]
+            handler = self.command_handlers[command.type]
             handler(command)
             self.queue.extend(self.context.events)
         except Exception:
