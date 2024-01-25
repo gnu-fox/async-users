@@ -1,11 +1,10 @@
 from uuid import uuid4
 from typing import Union, Generator, Any
 
-from passlib.context import CryptContext
-from sqlalchemy import URL
 from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from passlib.context import CryptContext
 
 from src.auth.adapters.async_sqlalchemy.schemas import Account as Schema
 from src.auth.domain.aggregates import Account, ID
@@ -36,6 +35,11 @@ class Accounts:
                 statement = select(Schema).filter_by(**kwargs)
                 result = await session.execute(statement)
                 schema = result.scalars().first()
+                if schema:
+                    account = Account(id=schema.id, username=schema.username)
+                    return account
+                
+                return None
             
             except Exception as exception:
                 await session.rollback()
