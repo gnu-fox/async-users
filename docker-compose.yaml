@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: test_database
+      POSTGRES_USER: test_username
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5432:5432"
+    networks:
+      - network
+
+  python-app:
+    image: python:latest
+    volumes:
+      - ./app:/app
+    depends_on:
+      - postgres
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
