@@ -3,25 +3,48 @@ version: '3'
 services:
   postgres:
     image: postgres:latest
+    container_name: postgres
     restart: always
     environment:
-      POSTGRES_DB: test_database
-      POSTGRES_USER: test_username
-      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
     ports:
       - "5432:5432"
     networks:
       - network
 
-  python-app:
-    image: python:latest
-    volumes:
-      - ./app:/app
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.dev
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - network
+
+  python:
+    container_name: python
+    build: .
+    restart: always
+    environment:
+      DATABASE_NAME: test
+      DATABASE_USER: test
+      DATABASE_PASSWORD: test
+      DATABASE_PORT: 5432
+
+    ports:
+      - "8000:8000"
     depends_on:
       - postgres
     networks:
       - network
 
 networks:
-  network:
-    driver: bridge
+    network:
+        driver: bridge
