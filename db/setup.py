@@ -22,7 +22,8 @@ async def database_connect(dns):
 async def migrate(sql_script : str, connection_pool : Pool) :
     async with connection_pool.acquire() as connection:
         await connection.execute(sql_script)
-    
+
+
 async def setup_database(dns : str):
     await database_connect(dns)
     pool = await asyncpg.create_pool(dsn=DNS)
@@ -35,7 +36,7 @@ async def setup_database(dns : str):
         print(f'Finished migration: {migration}')
 
 if __name__ == '__main__':
-    MIGRATIONS_PATH = 'database/migrations'
+    MIGRATIONS_PATH = 'db/migrations'
 
     DATABASE_USER = os.environ.get('DATABASE_USER')
     DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD')
