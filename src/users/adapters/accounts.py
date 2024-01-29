@@ -4,11 +4,10 @@ from typing import Union
 from sqlalchemy import insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.users.adapters.schemas import Account as Schema
+from src.users.adapters.db_schemas import Account as Schema
 from src.users.domain.models import ID, Account, SecretStr
 from src.users.domain.services import Security
-from src.users.ports.repository import Account as Repository
-from src.users.ports.repository import Credentials as CredentialsRepository
+from src.users.ports.accounts import Account as Repository
 
 class Accounts(Repository):
     def __init__(self, session : AsyncSession):

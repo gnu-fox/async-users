@@ -4,10 +4,10 @@ from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from src.users.adapters.repository.accounts import Accounts
-from src.users.adapters.repository.credentials import Credentials
+from src.users.adapters.accounts import Accounts
+from src.users.adapters.credentials import Credentials
 
-from src.users.ports.context import Repositories as UnitOfWork
+from users.ports.unit_of_work import Repositories as UnitOfWork
 
 class Repositories(UnitOfWork):
     def __init__(self, url : Union[str, URL], autoflush : bool = True):

@@ -3,9 +3,6 @@ from typing import Protocol, Union
 from pydantic import SecretStr
 from passlib.context import CryptContext
 
-ctx = CryptContext(schemes=['sha256_crypt'], deprecated='auto')
-
-
 class Cryptography(Protocol):
 
     def hash(self, password : str) -> str:

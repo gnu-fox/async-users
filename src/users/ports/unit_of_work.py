@@ -1,6 +1,7 @@
 from typing import Protocol
 
-from src.users.ports.repository import Accounts, Credentials
+from src.users.ports.accounts import Accounts
+from src.users.ports.credentials import Credentials
 
 class Session(Protocol):
 
@@ -39,4 +40,3 @@ class UnitOfWork:
 class Repositories(UnitOfWork):
     accounts : Accounts
     credentials : Credentials 
-
