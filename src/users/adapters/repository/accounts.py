@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.adapters.schemas import Account as Schema
 from src.users.domain.models import ID, Account, SecretStr
 from src.users.domain.services import Security
+from src.users.ports.repository import Account as Repository
+from src.users.ports.repository import Credentials as CredentialsRepository
 
-class Accounts:
+class Accounts(Repository):
     def __init__(self, session : AsyncSession):
         self.__session = session
 
@@ -33,15 +35,20 @@ class Accounts:
         schema = result.scalars().first()
 
         if schema:
-            security = Security(schema.password)
-            account = Account(id=schema.id, username=schema.username, security=security)
+            account = Account(id=schema.id, username=schema.username)
             return account
         return None
     
+    async def update(self, id : ID, username : str):
+        statement = select(Schema).where(Schema.id == id)
+        result = await self.__session.execute(statement)
+        schema = result.scalars().first()
+        if not schema:
+            raise Exception(f'Account with id {id} does not exist')
+        
+        statement = update(Schema).where(Schema.id == id).values(username=username)
+        await self.__session.execute(statement)
+
     async def delete(self, id : ID):
         statement = delete(Schema).where(Schema.id == id)
         await self.__session.execute(statement)
-
-
-
-
