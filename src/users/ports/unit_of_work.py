@@ -40,3 +40,6 @@ class UnitOfWork:
 class Repositories(UnitOfWork):
     accounts : Accounts
     credentials : Credentials 
+
+    def __init__(self, session: Session):
+        super().__init__(session)
