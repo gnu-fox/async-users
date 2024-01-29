@@ -18,8 +18,10 @@ class Repositories(UnitOfWork):
             autoflush = autoflush,
             class_ = AsyncSession
         )
-        self.__async_session = self.__async_session_factory()
-        super().__init__(self.__async_session)
-
-        self.accounts = Accounts(session=self.__async_session)
-        self.credentials = Credentials(session=self.__async_session)
+    
+    async def begin(self):
+        session = self.__async_session_factory()
+        super().__init__(session)
+        await session.begin()
+        self.accounts = Accounts(session)
+        self.credentials = Credentials(session)

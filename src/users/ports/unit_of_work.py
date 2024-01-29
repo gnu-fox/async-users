@@ -1,4 +1,5 @@
-from typing import Protocol
+from abc import ABC, abstractmethod
+from typing import Protocol, Callable
 
 from src.users.ports.accounts import Accounts
 from src.users.ports.credentials import Credentials
@@ -18,23 +19,34 @@ class Session(Protocol):
         ...
 
 
-class UnitOfWork:
-    def __init__(self, session : Session):
+class UnitOfWork(ABC):
+    def __init__(self, session : Session): 
         self.__session = session
+    
+    @abstractmethod
+    async def begin(self):
+        ...
 
     async def __aenter__(self):
-        await self.__session.begin()
+        self.begin()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.__session.rollback()
-        await self.__session.close()
-
-    async def begin(self):
-        await self.__session.begin()
-
+        if exc_type is None:
+            await self.commit()
+        else:
+            await self.rollback()
+        await self.close()
+        
     async def commit(self):
         await self.__session.commit()
+
+    async def rollback(self):
+        await self.__session.rollback()
+
+    async def close(self):
+        await self.__session.commit()
+        await self.__session.close()
 
 
 class Repositories(UnitOfWork):
