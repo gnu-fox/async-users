@@ -1,22 +1,19 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, Protocol
 
 from src.users.domain.models import Account, SecretStr, ID
+from src.users.ports.utils import DataAccessObject as DAO
 
-class Accounts(ABC):
+class Accounts(Protocol):
 
-    @abstractmethod
     async def create(self, username: str, password: Union[str, SecretStr]) -> None:
         ...
 
-    @abstractmethod
     async def read(self, **kwargs) -> Union[Account, None]:
         ...
 
-    @abstractmethod
     async def update(self, id: ID, username: str) -> None:
         ...
 
-    @abstractmethod
     async def delete(self, id: ID) -> None:
         ...

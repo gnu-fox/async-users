@@ -7,27 +7,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.adapters.db_schemas import Account as Schema
 from src.users.domain.models import ID, SecretStr
 from src.users.domain.services import Security
-from src.users.ports.credentials import Credentials as Repository
 
-class Credentials(Repository):
+from src.users.ports.utils import DataAccessObject as DAO
+
+
+class Credentials(DAO):
     def __init__(self, session : AsyncSession):
-        self.__session = session
+        self.session = session
 
-    async def verify(self, username : str, password : Union[str, SecretStr])->bool:
-        statement = select(Schema).where(Schema.username == username)
-        result = await self.__session.execute(statement)
+    async def verify(self, id : ID, password : Union[str, SecretStr])->bool:
+        statement = select(Schema).where(Schema.id == id)
+        result = await self.session.execute(statement)
         schema = result.scalars().first()
         if not schema:
             return False
         return Security.verify(password, schema.password)
     
 
-    async def update(self, username : str, password : Union[str, SecretStr], new_password : Union[str, SecretStr]) -> bool:
-        verified = await self.verify(username, password)
+    async def change_password(self, id : ID, old_password : Union[str, SecretStr], new_password : Union[str, SecretStr]) -> bool:
+        verified = await self.verify(id, old_password)
         if not verified:
             return False
 
         hash = Security.hash(new_password)
-        statement = update(Schema).where(Schema.username == username).values(password=hash)
-        await self.__session.execute(statement)
-
+        statement = update(Schema).where(Schema.id == id).values(password=hash)
+        await self.session.execute(statement)
