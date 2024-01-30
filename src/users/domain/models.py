@@ -9,4 +9,5 @@ class Account(BaseModel):
     id : ID
     username : str
 
-        
+class User:
+    pass

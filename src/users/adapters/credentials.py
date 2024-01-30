@@ -12,7 +12,7 @@ from src.users.ports.utils import DataAccessObject as DAO
 
 
 class Credentials(DAO):
-    def __init__(self, session : AsyncSession):
+    def __init__(self, session : AsyncSession = None):
         self.session = session
 
     async def verify(self, id : ID, password : Union[str, SecretStr])->bool:

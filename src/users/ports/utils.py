@@ -20,6 +20,7 @@ class UnitOfWork(ABC):
     
     def __init__(self, session : Session):
         self.__session = session
+
     @abstractmethod
     async def begin(self):
         ...
@@ -44,23 +45,11 @@ class UnitOfWork(ABC):
 
 
 class DataAccessObject(ABC):
+
+    @abstractmethod
     def __init__(self, session : Session):
-        self.session = session
-
-
-class Repository(UnitOfWork):
-    def __init__(self, sessionmaker : Callable[[],Session]):
-        self.__session_factory = sessionmaker
-
-    async def begin(self):
-        session = self.__session_factory()
-        super().__init__(session)
-        for _, attribute_value in self.__dict__.items():
-            if isinstance(attribute_value, DataAccessObject):
-                attribute_value.__init__(session)
-        await session.begin()
-
-
+        ...
+        
 
 class Repository(UnitOfWork):
     session_factory : Callable[[],Session]

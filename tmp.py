@@ -1,23 +1,23 @@
+from typing import Protocol
 from abc import ABC, abstractmethod
+
+class absB(Protocol):
+    def print(self):
+        ...
+
+
+class absC(Protocol):
+    def print(self):
+        ...
 
 class A(ABC):
     pass
 
-    @abstractmethod
-    def print(self):
-        ...
-
 class B(A):
-    def __init__(self):
-        pass
-
     def print(self):
         print("B")
 
 class C(A):
-    def __init__(self):
-        pass
-
     def print(self):
         print("C")
 
@@ -35,14 +35,32 @@ class Repo:
                 attribute_value.print()
                 
 
+class W(Repo):
+    def __init__(self):
+        super().__init__()
+        self.b : absB
+        self.c : absB
 
 
-class D(Repo):
+class D(W):
     def __init__(self):
         super().__init__()
         self.b = B()
-        self.c = C()
-
 
 d = D()
 d.begin()
+
+
+
+class Base(ABC):
+    def __init__(self, a : int):
+        ...
+    
+
+class Derived(Base):
+    def __init__(self, a : int):
+        self.a = a
+
+
+m = Derived(1)
+print(m.a)
