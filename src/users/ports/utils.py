@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Protocol, Callable
 
@@ -19,29 +20,29 @@ class Session(Protocol):
 class UnitOfWork(ABC):
     
     def __init__(self, session : Session):
-        self.__session = session
+        self.session = session
 
     @abstractmethod
     async def begin(self):
         ...
     
     async def commit(self):
-        await self.__session.commit()
+        await self.session.commit()
 
     async def rollback(self):
-        await self.__session.rollback()
+        await self.session.rollback()
 
     async def close(self):
-        await self.__session.commit()
-        await self.__session.close()
+        await self.session.commit()
+        await self.session.close()
 
     async def __aenter__(self):
-        self.begin()
+        await self.begin()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        self.rollback()
-        self.close()
+        await self.rollback()
+        await self.close()
 
 
 class DataAccessObject(ABC):
@@ -52,8 +53,7 @@ class DataAccessObject(ABC):
         
 
 class Repository(UnitOfWork):
-    session_factory : Callable[[],Session]
-
+    session_factory : Callable[[],Session] = None
     def __init__(self):
         self.__session_factory = self.session_factory
 
@@ -63,7 +63,7 @@ class Repository(UnitOfWork):
         
         session = self.__session_factory()
         super().__init__(session)
-        for _, attribute_value in self.__dict__.items():
+        for attribute_name, attribute_value in self.__dict__.items():
             if isinstance(attribute_value, DataAccessObject):
                 attribute_value.__init__(session)
         await session.begin()

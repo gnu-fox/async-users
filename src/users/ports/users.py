@@ -9,10 +9,9 @@ from src.users.domain.models import User
 
 class Users(Repository):
     def __init__(self):
+        super().__init__()
         self.accounts : Accounts
         self.credentials : Credentials
 
     async def create(self, username: str, password: Union[str, SecretStr]) -> User:
         raise NotImplementedError
-    
-    
