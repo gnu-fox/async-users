@@ -9,7 +9,7 @@ from src.users.adapters.credentials import Credentials
 
 class ORM:
 
-    def __init__(self, url : Union[str, URL], expire_on_commit : bool = True, autoflush : bool = True):
+    def __init__(self, url : Union[str, URL], expire_on_commit : bool = False, autoflush : bool = True):
         self.__async_engine = create_async_engine(url=url)
         self.__async_session_factory = async_sessionmaker(
             bind = self.__async_engine,
@@ -24,21 +24,3 @@ class ORM:
     @property
     def session_factory(self):
         return self.__async_session_factory
-
-
-class Provider:
-
-    def __init__(self, orm : ORM):
-        self.__orm = orm
-
-    @property
-    def session_factory(self):
-        return self.__orm.session_factory
-
-    @property
-    def accounts(self) -> Accounts:
-        return Accounts(session = None)
-    
-    @property
-    def credentials(self) -> Credentials:
-        return Credentials(session = None)

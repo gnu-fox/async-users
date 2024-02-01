@@ -4,7 +4,7 @@ import pytest
 
 pytest_plugins = ('pytest_asyncio',)
 
-from src.users.adapters.db_provider import URL, ORM
+from src.users.adapters.orm import URL, ORM
 from src.users.adapters.accounts import Accounts
 
 @pytest.fixture
