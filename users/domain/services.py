@@ -17,8 +17,14 @@ def reveal(secret : Union[str, SecretStr]) -> str:
     return secret
 
 
+DEFAULT_CRYPTOGRAPHY_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 class Security:
-    context : Cryptography = CryptContext(schemes=['sha256_crypt'], deprecated='auto')
+    context : Cryptography = DEFAULT_CRYPTOGRAPHY_CONTEXT
+
+    @classmethod
+    def setup(cls, context : Cryptography) -> None:
+        cls.context = context
 
     @classmethod
     def hash(cls, password : Union[str, SecretStr]) -> str:
@@ -27,4 +33,3 @@ class Security:
     @classmethod
     def verify(cls, password : Union[str, SecretStr], hash : str) -> bool:
         return cls.context.verify(reveal(password), hash)
-    

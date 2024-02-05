@@ -1,32 +1,23 @@
-import os
-import sys
-import dotenv
+class Account:
+    def __init__(self, id):
+        self.id = id
 
-dotenv.load_dotenv()
+    def __repr__(self) -> str:
+        return f"Account(id={self.id})"
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+account1 = Account(id=1)
+account2 = Account(id=2)
+account3 = Account(id=3)
 
-from src.users.adapters.orm import URL, ORM
-from src.users.services.users import Users
+account4 = Account(id=4)
+account5 = Account(id=5)
+account6 = Account(id=6)
 
-url = URL.create(
-    drivername='postgresql+asyncpg',
-    username=os.getenv('DATABASE_USER'),
-    password=os.getenv('DATABASE_PASSWORD'),
-    host=os.getenv('DATABASE_HOST'),
-    port=os.getenv('DATABASE_PORT'), 
-    database=os.getenv('DATABASE_NAME')
-)
+set1 = {account1, account2, account3}
+set2 = {account4, account5, account6}
 
-orm = ORM(url=url)
+set1.update(set2)
+set2.clear()
 
-users = Users(orm=orm)
-
-async def main():
-    async with users:
-        user = await users.create(username='test', password='test')
-        users.commit()
-        
-if __name__ == '__main__':
-    import asyncio
-    asyncio.run(main())
+print(set1)
+print(set2)
