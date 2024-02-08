@@ -7,20 +7,21 @@ from fastapi import Depends, HTTPException, status
 from src.auth.settings import Settings
 from src.auth.adapters import Accounts 
 from src.auth.adapters import SessionFactory
+from src.auth.models import Credentials
+from src.auth.models import Account
+from src.auth.models import User
 from src.auth.ports import Security
-from src.auth.ports import Repository
 
-class Users(Repository):
+class Users:
 
     def __init__(self, settings : Settings, security : Security = None):
         self.session_factory = SessionFactory(settings)
-        self.accounts = Accounts(session=None)
         if security:
             self.accounts.security = security
 
     async def __aenter__(self):
         self.session = self.session_factory()
-        self.accounts.__init__(self.session)
+        self.accounts = Accounts(session=None)
         await self.session.begin()
         return self
     
@@ -30,6 +31,14 @@ class Users(Repository):
         else:
             await self.session.rollback()
         await self.session.close()
+
+    async def create(self, credentials : Credentials) -> User:
+        account = await self.accounts.create(credentials.model_dump())
+        user = User(account = account)
+        return user
+    
+    async def delete(self, user : User):   
+        await self.accounts.delete(user.account)
 
 
 class JWTAuth:

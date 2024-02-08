@@ -3,6 +3,7 @@ from typing import Dict
 from typing import Any
 from typing import Optional
 
+from sqlalchemy import URL
 from sqlalchemy import insert, delete, select, update
 from sqlalchemy import Column
 from sqlalchemy import UUID

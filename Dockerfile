@@ -17,5 +17,4 @@ COPY pyproject.toml ./
 RUN poetry install
 
 COPY . /app
-CMD [ "poetry", "run", "python", "db/setup.py", "&&", "poetry", "run", "pytest"]
-
+CMD [ "poetry", "run", "pytest"]

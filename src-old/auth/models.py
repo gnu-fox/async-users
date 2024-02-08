@@ -12,3 +12,7 @@ class Credentials(BaseModel):
 
 class Account(RootModel):
     root : Any
+
+class User:
+    def __init__(self, account : Account):
+        self.account = account

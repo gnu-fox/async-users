@@ -6,13 +6,22 @@ services:
     container_name: postgres
     restart: always
     environment:
-      POSTGRES_DB: test
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
     ports:
       - "5432:5432"
     networks:
       - network
+    volumes:
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   pgadmin:
     container_name: pgadmin
@@ -28,22 +37,21 @@ services:
     networks:
       - network
 
+#should wait for postgres to be up and running
   python:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: python
-    build: .
     restart: always
-    environment:
-      DATABASE_NAME: test
-      DATABASE_USER: test
-      DATABASE_PASSWORD: test
-      DATABASE_PORT: 5432
-
-    ports:
-      - "8000:8000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
     networks:
       - network
+    volumes:
+      - .:/app
 
 networks:
     network:

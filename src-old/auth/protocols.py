@@ -4,31 +4,32 @@ from typing import Dict
 from typing import TypeVar
 from typing import Any
 
+from src.auth.models import Account
+
 class Cryptography(Protocol):
 
     def hash(self, password : str) -> str:
         ...
 
     def verify(self, password : str, hash : str) -> bool:
-        ...        
-        
-
-ID = TypeVar("ID")
-class Accounts(Protocol[ID]):
-    
-    async def create(self, credentials : Dict[str, Any]) -> ID:
         ...
 
-    async def read(self, credentials : Dict[str, Any]) -> Optional[ID]:
+
+class Accounts(Protocol):
+    
+    async def create(self, credentials : Dict[str, Any]) -> Account:
+        ...
+
+    async def read(self, credentials : Dict[str, Any]) -> Optional[Account]:
         ...
     
     async def verify(self, credentials : Dict[str, Any]) -> bool:
         ...
 
-    async def update(self, id : ID, credentials : Dict[str, Any]):
+    async def update(self, account : Account, credentials : Dict[str, Any]):
         ...
     
-    async def delete(self, id : ID):
+    async def delete(self, account : Account):
         ...
 
 

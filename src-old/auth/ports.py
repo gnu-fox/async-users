@@ -1,12 +1,4 @@
 from typing import Union
-from typing import Optional
-from typing import Protocol
-from typing import Dict
-from typing import TypeVar
-from typing import Any
-from abc import ABC
-from abc import abstractmethod
-
 from pydantic import SecretStr
 
 from src.auth.models import Account
@@ -30,7 +22,7 @@ class Security:
         return self.context.verify(reveal(password), hash)
 
 
-class Repository(ABC):
+class Repository:
     def __init__(self, accounts : Accounts):
         self.accounts = accounts
 
