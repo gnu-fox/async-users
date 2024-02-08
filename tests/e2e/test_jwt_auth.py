@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 
-from src.auth.routers import JWTAuth
+from src.auth.services import JWTAuth
 
 @pytest_asyncio.fixture()
 async def client() -> AsyncIterator[httpx.AsyncClient]:
