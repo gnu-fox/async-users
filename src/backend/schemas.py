@@ -7,8 +7,8 @@ from sqlalchemy import func
 
 Schema = declarative_base()
 
-class User(Schema):
-    __tablename__ = 'credentials'
+class Account(Schema):
+    __tablename__ = 'accounts'
     id = Column(UUID, primary_key=True)
     username = Column(String(50), unique=True)
     password = Column(String(100))

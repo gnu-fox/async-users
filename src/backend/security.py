@@ -1,4 +1,5 @@
-from typing import Protocol, Union
+from typing import Protocol
+from typing import Union
 
 from pydantic import SecretStr
 from passlib.context import CryptContext
@@ -9,7 +10,7 @@ class Cryptography(Protocol):
         ...
 
     def verify(self, password : str, hash : str) -> bool:
-        ...        
+        ...
 
 def reveal(secret : Union[str, SecretStr]) -> str:
     if isinstance(secret, SecretStr):
@@ -17,14 +18,8 @@ def reveal(secret : Union[str, SecretStr]) -> str:
     return secret
 
 
-DEFAULT_CRYPTOGRAPHY_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 class Security:
-    context : Cryptography = DEFAULT_CRYPTOGRAPHY_CONTEXT
-
-    @classmethod
-    def setup(cls, context : Cryptography) -> None:
-        cls.context = context
+    context : Cryptography = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     @classmethod
     def hash(cls, password : Union[str, SecretStr]) -> str:
