@@ -3,7 +3,7 @@ import pytest
 from passlib.context import CryptContext
 from pydantic import SecretStr
 
-from src.backend.security import Security
+from src.users.security import Security
 
 def test_security():
     context = CryptContext(schemes=["bcrypt"], deprecated="auto")
