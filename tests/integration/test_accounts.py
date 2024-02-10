@@ -26,96 +26,96 @@ def url():
 
 @pytest.mark.asyncio
 async def test_create_account(url : URL):
-    uow = UnitOfWork(session_factory=SessionFactory(url=url))
-    async with uow:
+    accounts = UnitOfWork(session_factory=SessionFactory(url=url))
+    async with accounts:
         try:
-            await uow.create(credentials=Credentials(username='test', password='test'))
-            await uow.commit()
+            await accounts.create(credentials=Credentials(username='test', password='test'))
+            await accounts.commit()
         except LookupError:
             print('Account already in database. Skip')
             pass
 
-    async with uow:
+    async with accounts:
         try:
             query = select(ACCOUNT).where(ACCOUNT.username == 'test')
-            result = await uow.session.execute(query)
+            result = await accounts.session.execute(query)
             schema = result.scalars().first()
             assert schema.username == 'test'
         
         finally:
             command = delete(ACCOUNT).where(ACCOUNT.username == 'test')
-            await uow.session.execute(command)
-            await uow.commit()
+            await accounts.session.execute(command)
+            await accounts.commit()
 
 @pytest.mark.asyncio
 async def test_read_account(url : URL):
-    uow = UnitOfWork(session_factory=SessionFactory(url=url))
+    accounts = UnitOfWork(session_factory=SessionFactory(url=url))
     identity = uuid4()
-    async with uow:
+    async with accounts:
         command = insert(ACCOUNT).values(id=identity, username='test', password='test')
-        await uow.session.execute(command)
-        await uow.commit()
+        await accounts.session.execute(command)
+        await accounts.commit()
     
-    async with uow:
+    async with accounts:
         try:
-            account = await uow.read(credentials=Credentials(username='test'))
+            account = await accounts.read(credentials=Credentials(username='test'))
             assert account.id == identity
 
         finally:
             command = delete(ACCOUNT).where(ACCOUNT.username == 'test')
-            await uow.session.execute(command)
-            await uow.commit()
+            await accounts.session.execute(command)
+            await accounts.commit()
 
 
 @pytest.mark.asyncio
 async def test_update_account(url : URL):
-    uow = UnitOfWork(session_factory=SessionFactory(url=url))
+    accounts = UnitOfWork(session_factory=SessionFactory(url=url))
     identity = uuid4()
 
-    async with uow:
+    async with accounts:
         command = insert(ACCOUNT).values(id=identity, username='test', password='test')
-        await uow.session.execute(command)
-        await uow.commit()
+        await accounts.session.execute(command)
+        await accounts.commit()
 
     try:
-        async with uow:
-            await uow.update(Account(identity=identity), credentials=Credentials(username='test2'))
-            await uow.commit()
+        async with accounts:
+            await accounts.update(Account(identity=identity), credentials=Credentials(username='test2'))
+            await accounts.commit()
 
-        async with uow:
+        async with accounts:
             query = select(ACCOUNT).where(ACCOUNT.id==identity)
-            result = await uow.session.execute(query)
+            result = await accounts.session.execute(query)
             schema = result.scalars().first()
             assert schema.username == 'test2'
 
     finally:
-        async with uow:
+        async with accounts:
             command = delete(ACCOUNT).where(ACCOUNT.id == identity)
-            await uow.session.execute(command)
-            await uow.commit()
+            await accounts.session.execute(command)
+            await accounts.commit()
 
 
 @pytest.mark.asyncio
 async def test_delete_account(url : URL):
-    uow = UnitOfWork(session_factory=SessionFactory(url=url))
+    accounts = UnitOfWork(session_factory=SessionFactory(url=url))
     identity = uuid4()
-    async with uow:
+    async with accounts:
         command = insert(ACCOUNT).values(id=identity, username='test', password='test')
-        await uow.session.execute(command)
-        await uow.commit()
+        await accounts.session.execute(command)
+        await accounts.commit()
 
-    async with uow:
+    async with accounts:
         query = select(ACCOUNT).where(ACCOUNT.username == 'test')
-        result = await uow.session.execute(query)
+        result = await accounts.session.execute(query)
         schema = result.scalars().first()
         assert schema.username == 'test'
 
-    async with uow:
-        await uow.delete(account=Account(identity=identity))
-        await uow.commit()
+    async with accounts:
+        await accounts.delete(account=Account(identity=identity))
+        await accounts.commit()
 
-    async with uow:
+    async with accounts:
         query = select(ACCOUNT).where(ACCOUNT.username == 'test')
-        result = await uow.session.execute(query)
+        result = await accounts.session.execute(query)
         schema = result.scalars().first()
         assert schema is None

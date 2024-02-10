@@ -6,10 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.settings import Settings
 from src.users.models import Account
 from src.users.models import Credentials
 from src.backend.gateway import Accounts
+
 
 class SessionFactory:
     def __init__(self, url : Union[str, URL]):
@@ -19,9 +19,24 @@ class SessionFactory:
     def __call__(self) -> AsyncSession:
         return self.session_factory()
 
+
 class UnitOfWork:
     def __init__(self, session_factory : SessionFactory):
         self.session_factory = session_factory
+
+    async def begin(self):
+        self.session = self.session_factory()
+        self.accounts = Accounts(session = self.session)
+        await self.session.begin()
+
+    async def commit(self):
+        await self.session.commit()
+
+    async def rollback(self):
+        await self.session.rollback()
+
+    async def close(self):
+        await self.session.close()
 
     async def __aenter__(self):
         await self.begin()
@@ -29,18 +44,10 @@ class UnitOfWork:
     
     async def __aexit__(self, exc_type : Any, exc_value : Any, traceback : Any):
         if exc_type is None:
-            await self.session.commit()
+            await self.commit()
         else:
-            await self.session.rollback()
-        await self.session.close()
-
-    async def commit(self):
-        await self.session.commit()
-    
-    async def begin(self):
-        self.session = self.session_factory()
-        self.accounts = Accounts(session = self.session)
-        await self.session.begin()
+            await self.rollback()
+        await self.close()
 
     async def create(self, credentials : Credentials) -> Account:
         account = await self.accounts.create(credentials)

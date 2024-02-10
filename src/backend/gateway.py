@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.models import Account
 from src.users.models import Credentials
 from src.users.security import Security
-
 from src.backend.schemas import ACCOUNT
 
 class Accounts:
@@ -48,3 +47,12 @@ class Accounts:
     async def delete(self, account : Account):
         command = delete(ACCOUNT).where(ACCOUNT.id == account.id)
         await self.session.execute(command)
+
+    async def verify(self, credentials : Credentials) -> bool:
+        if credentials.username and credentials.password:
+            query = select(ACCOUNT).where(ACCOUNT.username == credentials.username)
+            result = await self.session.execute(query)
+            schema = result.scalars().first()
+            return Security.verify(credentials.password, schema.password) if schema else False
+        else:
+            raise KeyError("Invalid credentials")

@@ -1,5 +1,4 @@
 import secrets
-from typing import Protocol
 from typing import Union, Any
 from typing import Dict
 from datetime import datetime, timedelta
