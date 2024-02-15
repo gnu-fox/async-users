@@ -95,6 +95,20 @@ class Repository(Generic[T]):
                     yield aggregate.events.popleft()
             aggregate.saved = False
 
+
+T = TypeVar('T', bound=Aggregate, covariant=True)
+class Factory(ABC, Generic[T]):
+    repository : Repository[T]
+
+    @classmethod
+    def setup(cls, repository : Repository[T]):
+        cls.repository = repository
+    
+    @abstractmethod
+    def create(self, **kwargs) -> T:
+        ...
+
+
 MSG = TypeVar('MSG', bound=Union[Event, Command])
 class Handler(ABC, Generic[MSG]):
     @abstractmethod
