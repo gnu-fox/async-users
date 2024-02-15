@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS accounts (
     id UUID PRIMARY KEY,
     username VARCHAR(100) UNIQUE,
     password VARCHAR(100),

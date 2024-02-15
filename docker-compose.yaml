@@ -37,7 +37,6 @@ services:
     networks:
       - network
 
-#should wait for postgres to be up and running
   python:
     build:
       context: .

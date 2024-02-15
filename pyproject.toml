@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "fastapi-users"
+name = "async-users"
 version = "0.1.0"
 description = ""
 authors = ["ericcardozo <eric.m.cardozo@mi.unc.edu.ar>"]
