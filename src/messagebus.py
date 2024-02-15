@@ -79,7 +79,7 @@ class Repository(Generic[T]):
         self.collection.add(aggregate)
     
     def get(self, id) -> Optional[T]:
-        for aggregate in self.__collection:
+        for aggregate in self.collection:
             if aggregate.id == id:
                 return aggregate
         return None
