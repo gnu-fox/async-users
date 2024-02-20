@@ -8,7 +8,7 @@ class AccountNotFound(Exception):
         message = "Account not found"
         super().__init__(message,  *args, **kwargs)
 
-class WrongPassword(Exception):
+class InvalidCredentials(Exception):
     def __init__(self, *args, **kwargs):
-        message = "Wrong password"
+        message = "Invalid credentials"
         super().__init__(message,  *args, **kwargs)

@@ -5,11 +5,11 @@ from uuid import uuid4
 from sqlalchemy import URL
 from sqlalchemy import select, insert, update, delete
 
-from src.auth.models import Credentials
-from src.auth.models import Account
-from src.auth.models import SecretStr
-from src.auth.schemas import ACCOUNT
-from src.auth.services import Settings, Users
+from src.auth.models.credentials import Credentials, SecretStr
+from src.auth.models.accounts import Account
+from src.auth.adapters.schemas import ACCOUNT
+from src.auth.adapters.adapters import UnitOfWork, SessionFactory, URL
+
 
 @pytest.fixture
 def url():
@@ -24,7 +24,7 @@ def url():
 
 @pytest.mark.asyncio
 async def test_create_account(url : URL):
-    uow = Users(settings = Settings(database_url=url))
+    uow = UnitOfWork(session_factory=SessionFactory(url=url))
     identity = uuid4()
     async with uow:
         command = delete(ACCOUNT).where(ACCOUNT.username == 'test')
@@ -32,7 +32,7 @@ async def test_create_account(url : URL):
         await uow.commit()
 
         try:
-            await uow.accounts.create(account = Account(id=identity), credentials=Credentials(username='test', password='test'))
+            await uow.accounts.create(account = Account(id=identity, credentials=Credentials(username='test', password='test')))
             await uow.commit()
         except Exception:
             print('Account already in database. Skip')
@@ -53,7 +53,7 @@ async def test_create_account(url : URL):
 
 @pytest.mark.asyncio
 async def test_read_account(url : URL):
-    uow = Users(settings = Settings(database_url=url))
+    uow = UnitOfWork(session_factory=SessionFactory(url=url))
     identity = uuid4()
     async with uow:
         try:
@@ -77,7 +77,7 @@ async def test_read_account(url : URL):
 
 @pytest.mark.asyncio
 async def test_update_account(url : URL):
-    uow = Users(settings = Settings(database_url=url))
+    uow = UnitOfWork(session_factory=SessionFactory(url=url))
     identity = uuid4()
 
     async with uow:
@@ -91,7 +91,7 @@ async def test_update_account(url : URL):
     
     try:
         async with uow:
-            await uow.accounts.update(Account(id=identity), credentials=Credentials(username='test2'))
+            await uow.accounts.update(Account(id=identity, credentials=Credentials(username='test2')))
             await uow.commit()
 
         async with uow:
@@ -109,7 +109,7 @@ async def test_update_account(url : URL):
 
 @pytest.mark.asyncio
 async def test_delete_account(url : URL):
-    uow = Users(settings = Settings(database_url=url))
+    uow = UnitOfWork(session_factory=SessionFactory(url=url))
     identity = uuid4()
 
     async with uow:

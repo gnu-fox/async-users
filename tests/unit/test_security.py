@@ -1,17 +1,9 @@
 import pytest
-from uuid import uuid4
 
-from src.auth.models import Security
-from src.auth.models import Claim, Token, Tokenizer
+from src.users.security import Security, SecretStr
 
-def test_hash():
+def test_security():
     password = "password"
-    hashed = Security.hash(password)
-    assert Security.verify(password, hashed)
-
-def test_encode():
-    account = uuid4()
-    claim = Claim(sub=account)
-    token = Tokenizer.encode(claim=claim)
-    assert token.access_token
-    assert token.token_type == "bearer"
+    hashed_password = Security.hash(password)
+    assert Security.verify(password, hashed_password) == True
+    assert Security.verify(SecretStr(password), hashed_password) == True

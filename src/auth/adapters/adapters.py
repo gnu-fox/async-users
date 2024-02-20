@@ -10,19 +10,18 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.models import Account
-from src.auth.models import Credentials, SecretStr
-from src.auth.models import Security
-from src.auth.schemas import ACCOUNT
+from src.auth.adapters.schemas import ACCOUNT
+from src.auth.models.credentials import Credentials
+from src.auth.models.accounts import Account
 
 class Accounts:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, account : Account, credentials : Credentials):
+    async def create(self, account : Account):
+        credentials = account.credentials
         if credentials.username and credentials.password:
-            hash = Security.hash(credentials.password)
-            command = insert(ACCOUNT).values(id=account.id, username=credentials.username, password=hash.get_secret_value())
+            command = insert(ACCOUNT).values(id=account.id, **credentials.model_dump(exclude_none=True))
             await self.session.execute(command)
         else:
             raise KeyError("Invalid credentials")    
@@ -37,25 +36,18 @@ class Accounts:
         account = result.scalars().first()
 
         if account:
-            authenticated = Security.verify(credentials.password, account.password) if credentials.password else False
-            return Account(id=account.id, authenticated = authenticated)
+            credentials = Credentials(
+                username=account.username, 
+                password=account.password)
+            return Account(id=account.id, credentials=credentials)
 
-    async def update(self, account : Account, credentials : Credentials):
-        command = update(ACCOUNT).where(ACCOUNT.id == account.id).values(credentials.fields)
+    async def update(self, account : Account):
+        command = update(ACCOUNT).where(ACCOUNT.id == account.id).values(**account.credentials.model_dump(exclude_none=True))
         await self.session.execute(command)
 
     async def delete(self, account : Account):
         command = delete(ACCOUNT).where(ACCOUNT.id == account.id)
         await self.session.execute(command)
-
-    async def verify(self, account : Account, password : SecretStr) -> bool:
-        query = select(ACCOUNT).where(ACCOUNT.id == account.id)
-        result = await self.session.execute(query)
-        account = result.scalars().first()
-        if account:
-            return Security.verify(password, account.password)
-        return False
-    
 
 
 class SessionFactory:
@@ -65,7 +57,7 @@ class SessionFactory:
 
     def __call__(self) -> AsyncSession:
         return self.session_factory()    
-    
+
 
 class UnitOfWork:
     def __init__(self, session_factory : SessionFactory):
@@ -73,6 +65,7 @@ class UnitOfWork:
 
     async def begin(self):
         self.session = self.session_factory()
+        self.accounts = Accounts(session=self.session)
         await self.session.begin()
 
     async def commit(self):
