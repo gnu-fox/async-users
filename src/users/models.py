@@ -3,17 +3,29 @@ from typing import Deque
 from typing import Generator
 
 from collections import deque
-from dataclasses import dataclass
+from uuid import UUID
+from pydantic import BaseModel
 
-@dataclass
-class Entity:
+
+class Event(BaseModel):
+    pass
+
+
+class Command(BaseModel):
+    pass
+
+
+class Entity(BaseModel):
     id : Any
 
-class Event:
-    pass
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, self.__class__):
+            return self.id == __value.id
+        return False
+    
+    def __hash__(self) -> int:
+        return hash(self.id)
 
-class Command:
-    pass
 
 class Aggregate:
     def __init__(self, root : Entity):
@@ -33,6 +45,9 @@ class Aggregate:
     def __hash__(self) -> int:
         return hash(self.id)
     
+    def dispatch(self, event : Event):
+        self.events.append(event)
+    
     def save(self):
         self.saved = True
     
@@ -41,9 +56,9 @@ class Aggregate:
         self.saved = False
 
 
-@dataclass
 class Account(Entity):
-    id : Any
+    id : UUID
+
 
 class User(Aggregate):
     def __init__(self, account : Account):

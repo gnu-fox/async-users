@@ -1,6 +1,5 @@
 from uuid import uuid4
 from typing import Dict
-from typing import Deque
 from typing import Callable
 from typing import List
 from typing import Union
@@ -48,13 +47,4 @@ class Factory:
     def create(self, account : Account) -> User:
         user = User(account=account)
         self.repository.add(user)
-        return user
-    
-class Users:
-    def __init__(self):
-        self.factory = Factory
-        self.application = Application(self.factory.repository)
-
-    async def create(self, **kwargs) -> User:
-        user = self.factory.create(Account(id = uuid4()))
         return user

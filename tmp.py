@@ -1,19 +1,14 @@
-from src.users.models import User
-from src.users.models import Account
-from src.users.repository import Repository
+from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
-class Factory:
-    repository = Repository[User](collection=set())
 
-    @classmethod
-    def create(self, account : Account) -> User:
-        user = User(account=account)
-        self.repository.add(user)
-        return user
-    
+class Model(BaseModel):
+    id: int
 
-users = Factory
-account = Account(id=1)
-user = users.create(account)
-users.repository.add(user)
-assert users.repository.get(1) == user
+class Data(BaseModel):
+    id: int
+
+data = Data(id=1)
+
+#model_from data
+model = Model(**data.dict())
