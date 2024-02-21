@@ -26,7 +26,6 @@ class Handler(ABC, Generic[T]):
         pass
 
 
-
 class CreateAccount(Handler[events.UserCreated]):
     def __init__(self, uow : UnitOfWork):
         self.uow = uow
@@ -47,6 +46,8 @@ class Users:
         self.uow = uow
         self.application = Application(self.repository)
         self.application.consumers[events.UserCreated] = [CreateAccount(uow=uow)]
+
+    #TODO: FIX THIS, users should have it's own session factory
 
     async def __aenter__(self):
         await self.uow.__aenter__()
