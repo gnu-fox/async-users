@@ -1,6 +1,6 @@
 import pytest
 
-from src.users.security import Security, SecretStr
+from src.auth.models.security import Security, SecretStr
 
 def test_security():
     password = "password"

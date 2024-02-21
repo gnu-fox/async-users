@@ -4,16 +4,16 @@ from fastapi import APIRouter
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from src.settings import Settings
 from src.auth import exceptions
-from src.auth.services import Settings
-from src.auth.services import Authentication
+from src.auth.services import authenticate, register
+from src.auth.models.credentials import Credentials
 from src.auth.adapters.adapters import UnitOfWork, SessionFactory
 from src.auth.models.tokens import Token
 
 class Auth:
     def __init__(self, settings : Settings, prefix : str = "/auth"):
         self.uow = UnitOfWork(session_factory=SessionFactory(url=settings.database_uri))
-        self.service = Authentication(uow=self.uow)
         self.bearer = OAuth2PasswordBearer(tokenUrl=settings.token_url)
         self.router = APIRouter(prefix=prefix)
         self.router.add_api_route("/login", self.login, methods=["POST"], response_model=Token)
@@ -24,8 +24,10 @@ class Auth:
 
     async def login(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
         try:
-            account = await self.service.authenticate(username=form_data.username, password=form_data.password)
-            return account.create_token()
+            credentials = Credentials(username=form_data.username, password=form_data.password)
+            account = await authenticate(credentials=credentials, uow=self.uow)
+            token = account.create_token()
+            return token
 
         except exceptions.AccountNotFound:
             raise HTTPException(
@@ -42,10 +44,10 @@ class Auth:
                 status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail = str(error))
 
-
     async def register(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         try:
-            await self.service.register(username=form_data.username, password=form_data.password)
+            credentials = Credentials(username=form_data.username, password=form_data.password)
+            await register(credentials=credentials, uow=self.uow)
         
         except exceptions.AccountAlreadyExists:
             raise HTTPException(

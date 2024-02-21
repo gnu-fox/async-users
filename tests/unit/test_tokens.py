@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 from uuid import uuid4
 from jose import jwt
 from jose import ExpiredSignatureError
-from src.users.tokens import Claim, Token, Tokenizer
+from src.auth.models.tokens import Claim, Token, Tokenizer
 
 
 def test_token():
