@@ -5,7 +5,7 @@ from typing import Generator
 from collections import deque
 
 from src.users.accounts import Account
-from src.users.accounts import Credentials
+from src.users.accounts import Credential
 from src.users.events import Event
 
 class User:

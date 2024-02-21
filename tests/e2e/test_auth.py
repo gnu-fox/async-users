@@ -9,7 +9,7 @@ import pytest_asyncio
 from fastapi import FastAPI
 
 from src.auth.models.accounts import Account
-from src.auth.models.credentials import Credentials, SecretStr
+from src.auth.models.credentials import Credential, SecretStr
 from src.auth.endpoints import Auth, Settings
 from src.auth.adapters.adapters import UnitOfWork, URL, SessionFactory
 
@@ -42,11 +42,11 @@ async def client(url : URL) -> AsyncIterator[httpx.AsyncClient]:
 @pytest.mark.asyncio
 async def test_login(client : httpx.AsyncClient, url : URL) -> None:
     uow = UnitOfWork(session_factory=SessionFactory(url=url))
-    credentials = Credentials(username='test', password='test')
-    credentials.hash()
-    account = Account(id=uuid4(), credentials = credentials)
+    credential = Credential(username='test', password='test')
+    credential.hash()
+    account = Account(id=uuid4(), credential = credential)
     async with uow:
-        existent = await uow.accounts.read(credentials = Credentials(username='test'))
+        existent = await uow.accounts.read(credential = Credential(username='test'))
         if existent:
             await uow.accounts.delete(existent)
             
@@ -66,7 +66,7 @@ async def test_register(client : httpx.AsyncClient, url : URL) -> None:
     uow = UnitOfWork(session_factory=SessionFactory(url=url))
     async with uow:
 
-        existent = await uow.accounts.read(credentials = Credentials(username='test'))
+        existent = await uow.accounts.read(credential = Credential(username='test'))
         if existent:
             await uow.accounts.delete(existent)
 
@@ -74,7 +74,7 @@ async def test_register(client : httpx.AsyncClient, url : URL) -> None:
         response = await client.post('/auth/register', data=form_data)
         assert response.status_code == 200
 
-        account = await uow.accounts.read(credentials = Credentials(username='test'))
+        account = await uow.accounts.read(credential = Credential(username='test'))
         assert account
         await uow.accounts.delete(account)
         await uow.commit()

@@ -5,7 +5,7 @@ from uuid import uuid4
 from sqlalchemy import URL
 from sqlalchemy import select, insert, update, delete
 
-from src.auth.models.credentials import Credentials, SecretStr
+from src.auth.models.credentials import Credential, SecretStr
 from src.auth.models.accounts import Account
 from src.auth.adapters.schemas import ACCOUNT
 from src.auth.adapters.adapters import UnitOfWork, SessionFactory, URL
@@ -32,7 +32,7 @@ async def test_create_account(url : URL):
         await uow.commit()
 
         try:
-            await uow.accounts.create(account = Account(id=identity, credentials=Credentials(username='test', password='test')))
+            await uow.accounts.create(account = Account(id=identity, credential=Credential(username='test', password='test')))
             await uow.commit()
         except Exception:
             print('Account already in database. Skip')
@@ -66,7 +66,7 @@ async def test_read_account(url : URL):
     
     async with uow:
         try:
-            account = await uow.accounts.read(credentials=Credentials(username='test'))
+            account = await uow.accounts.read(credential=Credential(username='test'))
             assert account.id == identity
 
         finally:
@@ -91,7 +91,7 @@ async def test_update_account(url : URL):
     
     try:
         async with uow:
-            await uow.accounts.update(Account(id=identity, credentials=Credentials(username='test2')))
+            await uow.accounts.update(Account(id=identity, credential=Credential(username='test2')))
             await uow.commit()
 
         async with uow:

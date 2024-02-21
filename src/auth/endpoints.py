@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from src.settings import Settings
 from src.auth import exceptions
 from src.auth.services import authenticate, register
-from src.auth.models.credentials import Credentials
+from src.auth.models.credentials import Credential
 from src.auth.adapters.adapters import UnitOfWork, SessionFactory
 from src.auth.models.tokens import Token
 
@@ -24,8 +24,8 @@ class Auth:
 
     async def login(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
         try:
-            credentials = Credentials(username=form_data.username, password=form_data.password)
-            account = await authenticate(credentials=credentials, uow=self.uow)
+            credential = Credential(username=form_data.username, password=form_data.password)
+            account = await authenticate(credential=credential, uow=self.uow)
             token = account.create_token()
             return token
 
@@ -34,10 +34,10 @@ class Auth:
                 status_code = status.HTTP_404_NOT_FOUND,
                 detail = "Account not found")
         
-        except exceptions.InvalidCredentials:
+        except exceptions.InvalidCredential:
             raise HTTPException(
                 status_code = status.HTTP_401_UNAUTHORIZED,
-                detail = "Invalid credentials")
+                detail = "Invalid credential")
         
         except Exception as error:
             raise HTTPException(
@@ -46,8 +46,8 @@ class Auth:
 
     async def register(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         try:
-            credentials = Credentials(username=form_data.username, password=form_data.password)
-            await register(credentials=credentials, uow=self.uow)
+            credential = Credential(username=form_data.username, password=form_data.password)
+            await register(credential=credential, uow=self.uow)
         
         except exceptions.AccountAlreadyExists:
             raise HTTPException(
@@ -57,7 +57,7 @@ class Auth:
         except KeyError:
             raise HTTPException(
                 status_code = status.HTTP_400_BAD_REQUEST,
-                detail = "Invalid credentials")
+                detail = "Invalid credential")
         
         except Exception as error:
             raise HTTPException(
